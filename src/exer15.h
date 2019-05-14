@@ -14,7 +14,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/bgsegm.hpp>
-#include "../../../funcs.h"
+#include "../inc/funcs.h"
 
 void example15_2(int, char**);
 
