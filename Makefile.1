@@ -1,0 +1,61 @@
+#!/usr/bin/make -f
+
+# My attempt at a makefile that will work reasonably for my Learning OpenCV3 exercises and examples.
+# Goals are to be able to change it as little as possible for each project, have it create binaries
+# in one step, and to be able to have it automatically run Google Test unit tests for some exercises.
+# Since these are simple projects, am putting obj files in current dir and binaries in bin.
+# Modified for this chapter to put all logic in a separate library, then link a simple main to that.
+# Done so that is easier/cleaner to create and run Google tests against the logic.
+
+
+BINDIR = bin/
+SRCDIR = src/
+BUILDDIR = build/
+TESTDIR = tests/
+
+SRCS_MAIN = main.cpp
+SRCS_LIB = exer15.cpp
+SRCS_TEST = newsimpletest.cpp
+MAINTARGETNAME = exercises15
+LIBTARGETNAME = exer15.o
+TESTTARGETNAME = exer15test
+LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lgregOpenCvHelp -lopencv_videoio -lopencv_video -lopencv_bgsegm
+LIBTEST = -lgtest
+
+G++ = g++
+OBJS_MAIN = $(SRCS_MAIN:.cpp=.o)
+OBJS_LIB = $(SRCS_LIB:.cpp=.o)
+OBJS_TEST = $(SRCS_TEST:.cpp=.o)
+LIBSTATICNAME = $(LIBTARGETNAME:.o=.a)
+FLAGS_LIB =
+FLAG_MAIN = 
+
+all: 	$(BUILDDIR)$(OBJS_MAIN) $(BUILDDIR)$(OBJS_LIB) $(BUILDDIR)$(OBJS_TEST)
+	mkdir -p $(BINDIR)
+
+	# Create the exer15.a library. (The src files have been automatically compiled to object files already.)
+	ar rcs $(BUILDDIR)$(LIBSTATICNAME) $(BUILDDIR)$(LIBTARGETNAME)
+
+	# Create the target executable.
+	$(G++) $(FLAGS_MAIN) -o $(BINDIR)$(MAINTARGETNAME) $(BUILDDIR)$(LIBTARGETNAME) $(BUILDDIR)$(OBJS_MAIN) $(LIBS)
+
+	# Create the test executable and run it.
+	$(G++) $(FLAGS_MAIN) -o $(BINDIR)$(TESTTARGETNAME) $(BUILDDIR)$(OBJS_TEST) $(BUILDDIR)$(LIBTARGETNAME) $(LIBS) $(LIBTEST)
+	$(BINDIR)$(TESTTARGETNAME)
+
+
+$(BUILDDIR)%.o: $(SRCDIR)%.cpp
+	$(COMPILE.cpp) -o $@ $<
+
+
+$(BUILDDIR)%.o: $(TESTDIR)%.cpp
+	$(COMPILE.cpp) -o $@ $<
+
+
+.PHONY: clean
+clean:
+	rm -f $(BUILDDIR)*.o $(BUILDDIR)*.a $(BINDIR)$(MAINTARGETNAME) $(BINDIR)$(TESTTARGETNAME)
+#	rm -f tests/*.o
+#	rm -f bin/*.o
+#	rm -f *.a
+
